@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import type { CardType } from "../types/board.types";
 import { useBoard } from "../context/BoardContext";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type Props = {
   card: CardType;
@@ -8,20 +10,40 @@ type Props = {
   index: number;
 };
 
-const Card: React.FC<Props> = ({ card, columnId, index }) => {
+const Card: React.FC<Props> = ({ card, columnId }) => {
   const { deleteCard, updateCard } = useBoard();
+
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState(card.title);
 
-  const onDragStart = (e: React.DragEvent) => {
-    e.dataTransfer.setData(
-      "card",
-      JSON.stringify({ cardId: card.id, fromColumn: columnId, index })
-    );
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({
+      id: card.id,
+      data: { columnId },
+    });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
   };
 
   return (
-    <div className={`card ${columnId}`} draggable onDragStart={onDragStart}>
+    <div ref={setNodeRef} style={style} className={`card ${columnId}`}>
+      {/* DRAG HANDLE ONLY */}
+      <div
+        className="dragHandle"
+        {...attributes}
+        {...listeners}
+        style={{
+          cursor: "grab",
+          marginBottom: "6px",
+          fontSize: "12px",
+          opacity: 0.6,
+        }}
+      >
+        ⠿ Drag
+      </div>
+
       {editing ? (
         <input
           value={text}
@@ -38,7 +60,10 @@ const Card: React.FC<Props> = ({ card, columnId, index }) => {
 
       <button
         className="deleteBtn"
-        onClick={() => deleteCard(columnId, card.id)}
+        onClick={(e) => {
+          e.stopPropagation();
+          deleteCard(columnId, card.id);
+        }}
       >
         🗑
       </button>

@@ -74,27 +74,29 @@ export const BoardProvider: React.FC<{ children: React.ReactNode }> = ({
     fromColumn: string,
     toColumn: string,
     cardId: string,
-    toIndex: number
+    toIndex: number,
   ) => {
-    setBoard(prev => {
+    setBoard((prev) => {
       let movedCard: CardType | null = null;
 
-      const newBoard = prev.map(col => {
+      const boardWithoutCard = prev.map((col) => {
         if (col.id === fromColumn) {
-          const card = col.cards.find(c => c.id === cardId);
+          const card = col.cards.find((c) => c.id === cardId);
           movedCard = card || null;
+
           return {
             ...col,
-            cards: col.cards.filter(c => c.id !== cardId),
+            cards: col.cards.filter((c) => c.id !== cardId),
           };
         }
         return col;
       });
 
-      return newBoard.map(col => {
+      return boardWithoutCard.map((col) => {
         if (col.id === toColumn && movedCard) {
           const cards = [...col.cards];
-          cards.splice(toIndex, 0, movedCard);
+          const safeIndex = Math.min(toIndex, cards.length);
+          cards.splice(safeIndex, 0, movedCard);
           return { ...col, cards };
         }
         return col;

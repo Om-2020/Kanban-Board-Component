@@ -2,12 +2,24 @@ import React, { useState } from "react";
 import type { ColumnType } from "../types/board.types";
 import { useBoard } from "../context/BoardContext";
 import Card from "./Card";
+import { useDroppable } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 const Column: React.FC<{ column: ColumnType }> = ({ column }) => {
-  const { addCard, moveCard } = useBoard();
+  const { addCard } = useBoard();
 
   const [showInput, setShowInput] = useState(false);
   const [text, setText] = useState("");
+
+  const { setNodeRef } = useDroppable({
+    id: column.id,
+    data: {
+      columnId: column.id,
+    },
+  });
 
   const handleAdd = () => {
     if (!text.trim()) return;
@@ -16,19 +28,8 @@ const Column: React.FC<{ column: ColumnType }> = ({ column }) => {
     setShowInput(false);
   };
 
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const data = JSON.parse(e.dataTransfer.getData("card"));
-
-    moveCard(data.fromColumn, column.id, data.cardId, column.cards.length);
-  };
-
   return (
-    <div
-      className="column"
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={onDrop}
-    >
+    <div ref={setNodeRef} className="column">
       <div className={`columnHeader ${column.id}`}>
         <div className="columnTitle">
           {column.title}
@@ -66,9 +67,14 @@ const Column: React.FC<{ column: ColumnType }> = ({ column }) => {
         </div>
       )}
 
-      {column.cards.map((card, index) => (
-        <Card key={card.id} card={card} columnId={column.id} index={index} />
-      ))}
+      <SortableContext
+        items={column.cards.map((c) => c.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        {column.cards.map((card, index) => (
+          <Card key={card.id} card={card} columnId={column.id} index={index} />
+        ))}
+      </SortableContext>
     </div>
   );
 };

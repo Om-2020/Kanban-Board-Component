@@ -24,9 +24,13 @@ This project demonstrates component-based architecture, drag-and-drop functional
 ---
 
 ### 🖱 Drag & Drop
-- Move cards across columns
-- Preserves card order inside columns
-- Implemented using HTML5 Drag and Drop API (No heavy libraries)
+- Move cards across columns  
+- Reorder cards inside columns  
+- Implemented using dnd-kit (Production-ready drag and drop solution)  
+- Supports Desktop + Mobile drag interactions  
+- Drag Handle → Used for dragging cards
+- Card Content → Clickable for editing
+- Delete Button → Clickable for delete action
 
 ---
 
